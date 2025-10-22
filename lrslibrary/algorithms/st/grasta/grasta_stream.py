@@ -5,7 +5,33 @@ from .admm_srp import admm_srp
 
 def grasta_stream(I_Omega: np.ndarray, idx: np.ndarray, U_hat: np.ndarray, 
                    status: Dict, OPTIONS: Dict, OPTS: Dict) -> Tuple[np.ndarray, Dict, Dict]:
+    """
+    GRASTA streaming update for online subspace tracking.
     
+    Args:
+        I_Omega: Observed data at sampled indices
+        idx: Indices of observed entries
+        U_hat: Current subspace estimate
+        status: Algorithm status dictionary
+        OPTIONS: Algorithm options
+        OPTS: ADMM solver options
+        
+    Returns:
+        U_hat: Updated subspace estimate
+        status: Updated status dictionary
+        OPTS: Updated solver options
+        
+    Example:
+        >>> import numpy as np
+        >>> I_Omega = np.random.randn(500)
+        >>> idx = np.random.choice(1000, 500, replace=False)
+        >>> U_hat = np.random.randn(1000, 5)
+        >>> U_hat, _ = np.linalg.qr(U_hat)
+        >>> status = {'init': 0}
+        >>> OPTIONS = {'DIM_M': 1000, 'RANK': 5, 'rho': 1.8, 'MAX_MU': 10000, 'MIN_MU': 1, 'ITER_MAX': 20}
+        >>> OPTS = {'DEBUG': False}
+        >>> U_hat, status, OPTS = grasta_stream(I_Omega, idx, U_hat, status, OPTIONS, OPTS)
+    """
     DIM_M = OPTIONS['DIM_M']
     RANK = OPTIONS['RANK']
     rho = OPTIONS['rho']
@@ -16,6 +42,8 @@ def grasta_stream(I_Omega: np.ndarray, idx: np.ndarray, U_hat: np.ndarray,
     CONSTANT_STEP = OPTIONS.get('CONSTANT_STEP', 0)
     
     if status['init'] == 0:
+        if 'DIM_M' not in OPTIONS or 'RANK' not in OPTIONS:
+            raise ValueError("OPTIONS must contain 'DIM_M' and 'RANK'")
         if 'U_init' in OPTIONS and OPTIONS['U_init'] is not None:
             U_hat = OPTIONS['U_init']
             U_hat, _ = qr(U_hat, mode='economic')
@@ -73,7 +101,13 @@ def grasta_stream(I_Omega: np.ndarray, idx: np.ndarray, U_hat: np.ndarray,
         U_hat, _ = qr(U_hat, mode='economic')
         
         if OPTS.get('DEBUG', False):
-            print(f"  Update: t={t:.4f}, step_norm={step_norm:.4e}, ||U||={np.linalg.norm(U_hat):.4f}")
+            if 'debug_history' not in status:
+                status['debug_history'] = []
+            status['debug_history'].append({
+                't': t,
+                'step_norm': step_norm,
+                'U_norm': np.linalg.norm(U_hat)
+            })
     
     status['w'] = w
     status['s_t'] = s_t

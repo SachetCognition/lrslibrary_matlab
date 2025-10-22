@@ -3,7 +3,53 @@ from typing import Tuple, Dict
 from scipy.linalg import svd
 
 def reprocs(M: np.ndarray, L_init: np.ndarray, mu: np.ndarray, 
-            ev_thresh: float, alpha: float, K: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+            ev_thresh: float, alpha: float, K: int,
+            residual_tol: float = 1e-10) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Recursive Projected Compressive Sensing (ReProCS) for dynamic robust PCA.
+    
+    Args:
+        M: Input data matrix (n x t)
+        L_init: Initial subspace basis (n x r)
+        mu: Mean vector (n x t) or (n,)
+        ev_thresh: Eigenvalue threshold for subspace change detection
+        alpha: Sparsity parameter
+        K: Number of sparse entries to keep
+        residual_tol: Tolerance for residual norm in subspace update (default 1e-10)
+        
+    Returns:
+        BG: Background (low-rank) component
+        FG: Foreground (sparse) component  
+        L_hat: Final subspace basis
+        S_hat: Sparse component
+        T_hat: Change detection indicators
+        t_hat: Number of detected changes
+        
+    Raises:
+        ValueError: If input parameters are invalid
+        
+    Example:
+        >>> import numpy as np
+        >>> M = np.random.randn(100, 40)
+        >>> L_init = np.random.randn(100, 5)
+        >>> L_init, _ = np.linalg.qr(L_init)
+        >>> mu = np.mean(M, axis=1)
+        >>> BG, FG, L_hat, S_hat, T_hat, t_hat = reprocs(M, L_init, mu, ev_thresh=0.1, alpha=1.0, K=10)
+    """
+    from ....utils import validate_input_matrix, validate_positive_param
+    
+    validate_input_matrix(M, "M")
+    validate_input_matrix(L_init, "L_init")
+    
+    if L_init.shape[0] != M.shape[0]:
+        raise ValueError(f"L_init rows ({L_init.shape[0]}) must match M rows ({M.shape[0]})")
+    
+    validate_positive_param(ev_thresh, "ev_thresh")
+    validate_positive_param(alpha, "alpha")
+    validate_positive_param(residual_tol, "residual_tol", allow_zero=True)
+    
+    if not isinstance(K, int) or K < 0:
+        raise ValueError(f"K must be a non-negative integer, got {K}")
     
     n, t = M.shape
     r = L_init.shape[1]
@@ -55,8 +101,8 @@ def reprocs(M: np.ndarray, L_init: np.ndarray, mu: np.ndarray,
             proj_y = L_hat @ (L_hat.T @ y_centered_for_update)
             residual = y_centered_for_update - proj_y
             
-            if np.linalg.norm(residual) > 1e-10:
-                L_hat_new = L_hat + (residual[:, np.newaxis] @ (residual[:, np.newaxis].T @ L_hat)) / (np.linalg.norm(residual)**2 + 1e-10)
+            if np.linalg.norm(residual) > residual_tol:
+                L_hat_new = L_hat + (residual[:, np.newaxis] @ (residual[:, np.newaxis].T @ L_hat)) / (np.linalg.norm(residual)**2 + residual_tol)
                 L_hat, _ = np.linalg.qr(L_hat_new)
                 P = L_hat @ L_hat.T
         
