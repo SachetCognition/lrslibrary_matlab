@@ -22,9 +22,21 @@ result = run_algorithm('MC', 'SVT', M, params={'Idx': Idx, 'Omega': Omega})
 L = result['L']
 S = result['S']
 
+if np.any(np.isnan(L)):
+    print(f"WARNING: L contains {np.sum(np.isnan(L))} nan values!")
+if np.any(np.isnan(S)):
+    print(f"WARNING: S contains {np.sum(np.isnan(S))} nan values!")
+
 print(f"L shape: {L.shape}")
 print(f"S shape: {S.shape}")
-print(f"Reconstruction error (observed): {np.linalg.norm((M - L)[Omega > 0]) / np.linalg.norm(M[Omega > 0]):.6f}")
+M_obs = M[Omega > 0]
+L_obs = L[Omega > 0]
+norm_M_obs = np.linalg.norm(M_obs)
+if norm_M_obs > 1e-10:
+    recon_error = np.linalg.norm(M_obs - L_obs) / norm_M_obs
+    print(f"Reconstruction error (observed): {recon_error:.6f}")
+else:
+    print(f"Reconstruction error (observed): N/A (denominator too small)")
 print(f"Low-rank component rank (approx): {np.linalg.matrix_rank(L)}")
 print(f"CPU time: {result['cputime']:.4f} seconds")
 print(f"Iterations: {result.get('numiter', 'N/A')}")

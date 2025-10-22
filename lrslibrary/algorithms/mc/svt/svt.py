@@ -43,7 +43,7 @@ def svt(n: Tuple[int, int], Omega: np.ndarray, b: np.ndarray, tau: float,
         
         if SMALLSCALE:
             U, Sigma, Vt = np.linalg.svd(Y.toarray(), full_matrices=False)
-            sigma = np.diag(Sigma)
+            sigma = Sigma
         else:
             try:
                 if s < min(n1, n2):
