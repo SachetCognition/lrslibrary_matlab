@@ -28,20 +28,24 @@ This document tracks the implementation status of all 5 priority algorithms migr
 
 ### ⚠️ SVT (Singular Value Thresholding - Matrix Completion)
 - **Location**: `lrslibrary/algorithms/mc/svt/`
-- **Status**: RUNS BUT HAS ISSUES
+- **Status**: RUNS BUT HAS ISSUES (PARTIAL FIX APPLIED)
 - **Known Issues**:
-  1. Reconstruction error shows as `nan`
-  2. Output has full rank (30) instead of low rank
-  3. Algorithm converges but results are incorrect
-- **Test Results**:
-  - Input: 2304×30 matrix with 50% sampling
-  - Execution time: 0.0290s
-  - Iterations: 64
-  - Low-rank component rank: 30 (should be much lower)
-  - Reconstruction error: nan
+  1. Reconstruction error shows as `nan` (division by zero in test)
+  2. Output has full rank (15) instead of low rank
+  3. Algorithm converges but results are numerically incorrect
+- **Test Results** (after sparse matrix fix):
+  - Input: 2304×15 matrix with 50% sampling
+  - Execution time: 1.4790s
+  - Iterations: 156
+  - Low-rank component rank: 15 (should be much lower, full rank)
+  - Reconstruction error (observed): nan
 - **Implementation**: Iterative singular value thresholding using scipy.sparse.linalg.svds
-- **Root Cause**: Likely issue with thresholding logic or reconstruction from observed samples
-- **Next Steps**: Debug the thresholding and reconstruction logic, verify against MATLAB implementation
+- **Recent Fix**: Corrected sparse matrix update bug (was incorrectly using sort_idx to update Y.data)
+- **Remaining Issues**: 
+  1. Thresholding logic not working (all singular values kept)
+  2. tau parameter might be calculated incorrectly
+  3. Reconstruction contains nan values
+- **Next Steps**: Debug tau calculation, verify thresholding against MATLAB, investigate nan source
 
 ### ⚠️ GRASTA (Grassmann Robust Adaptive Subspace Tracking)
 - **Location**: `lrslibrary/algorithms/st/grasta/`
@@ -49,7 +53,7 @@ This document tracks the implementation status of all 5 priority algorithms migr
 - **Known Issues**:
   1. All data goes to sparse component (S), nothing to low-rank (L)
   2. Perfect reconstruction but wrong separation
-  3. Subspace tracking not learning properly
+  3. Subspace tracking not learning properly - L is all zeros
 - **Test Results**:
   - Input: 2304×100 frames (training: 50, streaming: 50)
   - Execution time: 0.6665s
@@ -57,8 +61,17 @@ This document tracks the implementation status of all 5 priority algorithms migr
   - Sparse component sparsity: 100.00% (all data)
   - Reconstruction error: 0.000000 (perfect but wrong)
 - **Implementation**: Online subspace tracking on Grassmann manifold with gradient descent
-- **Root Cause**: Subspace initialization or gradient descent not converging properly
-- **Next Steps**: Debug subspace initialization and gradient descent, verify training phase logic
+- **Analysis**:
+  - Training phase: 30 cycles × 10 frames with random subsampling
+  - Streaming phase: Continues updating U_hat while reconstructing L and S
+  - L_hat = U_hat @ status['w'] * status['SCALE'] produces all zeros
+  - Likely causes: status['w'] stays at zero, gradient descent not converging
+- **Root Causes**:
+  1. Insufficient training (only 30 cycles may not converge)
+  2. Random subsampling on each iteration makes learning difficult
+  3. Gradient descent step size might be too small
+  4. Initial subspace (random QR) might be poor
+- **Next Steps**: Increase training cycles, verify gradient descent convergence, debug status['w'] updates
 
 ### ❌ MoG-RPCA (Mixture of Gaussians RPCA - Bayesian)
 - **Location**: `lrslibrary/algorithms/rpca/mog_rpca/`
