@@ -8,9 +8,6 @@ def svt(n: Tuple[int, int], Omega: np.ndarray, b: np.ndarray, tau: float,
     n1, n2 = n
     m = len(Omega)
     
-    Omega_sorted = np.sort(Omega)
-    sort_idx = np.argsort(Omega)
-    
     normb = np.linalg.norm(b)
     
     i_coords = Omega // n2
@@ -28,9 +25,7 @@ def svt(n: Tuple[int, int], Omega: np.ndarray, b: np.ndarray, tau: float,
     k0 = int(np.ceil(tau / (delta * normProjM)))
     y = k0 * delta * b
     
-    Y_data = Y.data.copy()
-    Y_data[sort_idx] = y
-    Y = csr_matrix((Y_data, (i_coords, j_coords)), shape=(n1, n2))
+    Y = csr_matrix((y, (i_coords, j_coords)), shape=(n1, n2))
     
     r = 0
     
@@ -87,9 +82,7 @@ def svt(n: Tuple[int, int], Omega: np.ndarray, b: np.ndarray, tau: float,
             break
         
         y = y + delta * (b - x)
-        Y_data = Y.data.copy()
-        Y_data[sort_idx] = y
-        Y = csr_matrix((Y_data, (i_coords, j_coords)), shape=(n1, n2))
+        Y = csr_matrix((y, (i_coords, j_coords)), shape=(n1, n2))
     
     numiter = k + 1
     
