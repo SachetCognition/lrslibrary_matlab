@@ -16,8 +16,12 @@ def grasta_stream(I_Omega: np.ndarray, idx: np.ndarray, U_hat: np.ndarray,
     CONSTANT_STEP = OPTIONS.get('CONSTANT_STEP', 0)
     
     if status['init'] == 0:
-        U_hat = np.random.randn(DIM_M, RANK)
-        U_hat, _ = qr(U_hat, mode='economic')
+        if 'U_init' in OPTIONS and OPTIONS['U_init'] is not None:
+            U_hat = OPTIONS['U_init']
+            U_hat, _ = qr(U_hat, mode='economic')
+        else:
+            U_hat = np.random.randn(DIM_M, RANK)
+            U_hat, _ = qr(U_hat, mode='economic')
         status['init'] = 1
         status['count'] = 0
         status['w'] = np.zeros(RANK)

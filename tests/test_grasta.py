@@ -27,7 +27,13 @@ print(f"Input shape: {M.shape}")
 print(f"True L rank: {np.linalg.matrix_rank(L_true)}")
 print(f"True S sparsity: {np.sum(np.abs(S_true) > 1e-6) / S_true.size:.2%}")
 
-result = run_algorithm('ST', 'GRASTA', M, params={'rank': 1, 'subsampling': 0.5, 'debug_admm': True})
+result = run_algorithm('ST', 'GRASTA', M, params={
+    'rank': 1, 
+    'subsampling': 1.0,
+    'use_svd_init': True,
+    'svd_init_frames': 10,
+    'debug_admm': True
+})
 
 L = result['L']
 S = result['S']
