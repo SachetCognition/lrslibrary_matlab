@@ -11,6 +11,7 @@ def run_alg(M: np.ndarray, params: Dict[str, Any] = None) -> Dict[str, Any]:
     
     subsampling = params.get('subsampling', 1.0)
     rank = params.get('rank', 1)
+    debug_admm = params.get('debug_admm', False)
     
     OPTIONS = {
         'RANK': rank,
@@ -23,11 +24,11 @@ def run_alg(M: np.ndarray, params: Dict[str, Any] = None) -> Dict[str, Any]:
         'CONSTANT_STEP': 0
     }
     
-    OPTS = {}
-    status = {'init': 0}
+    OPTS = {'DEBUG': debug_admm}
+    status = {'init': 0, 'frame_count': 0}
     U_hat = np.zeros((1,))
     
-    max_cycles = 100
+    max_cycles = 200
     training_frames = min(20, nframes)
     
     for outiter in range(max_cycles):
@@ -40,7 +41,14 @@ def run_alg(M: np.ndarray, params: Dict[str, Any] = None) -> Dict[str, Any]:
             idx = rp[:Z]
             I_Omega = I[idx]
             
+            if debug_admm and status['frame_count'] < 5:
+                print(f"Training frame {status['frame_count']} (cycle {outiter}, frame {i}):")
+                OPTS['DEBUG'] = True
+            else:
+                OPTS['DEBUG'] = False
+            
             U_hat, status, OPTS = grasta_stream(I_Omega, idx, U_hat, status, OPTIONS, OPTS)
+            status['frame_count'] += 1
     
     OPTIONS['CONSTANT_STEP'] = 1e-2
     
