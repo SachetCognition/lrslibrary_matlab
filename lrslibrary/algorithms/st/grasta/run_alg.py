@@ -27,8 +27,8 @@ def run_alg(M: np.ndarray, params: Dict[str, Any] = None) -> Dict[str, Any]:
     status = {'init': 0}
     U_hat = np.zeros((1,))
     
-    max_cycles = 30
-    training_frames = min(10, nframes)
+    max_cycles = 100
+    training_frames = min(20, nframes)
     
     for outiter in range(max_cycles):
         frame_order = np.random.permutation(training_frames)
