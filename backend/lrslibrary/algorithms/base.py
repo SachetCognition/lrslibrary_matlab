@@ -78,7 +78,7 @@ def hard_threshold(S: np.ndarray) -> np.ndarray:
     Returns:
         Binary outlier matrix O.
     """
-    beta = 0.5 * (np.std(S)) ** 2
+    beta = 0.5 * (np.std(S, ddof=1)) ** 2
     O = (0.5 * S**2 > beta).astype(np.float64)
     return O
 

@@ -3,11 +3,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from lrslibrary.algorithms import discover_algorithms
 from lrslibrary.api.routes import algorithms, jobs, video
 from lrslibrary.config import CORS_ORIGINS
 
-# Trigger algorithm auto-discovery
-import lrslibrary.algorithms  # noqa: F401
+discover_algorithms()
 
 app = FastAPI(
     title="LRSLibrary",

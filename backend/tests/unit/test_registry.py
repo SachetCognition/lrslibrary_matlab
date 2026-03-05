@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from lrslibrary.algorithms.base import Decomposer, DecompositionParams, DecompositionResult
+from lrslibrary.algorithms.base import Decomposer, DecompositionResult
 from lrslibrary.registry import (
     _registry,
     list_algorithms,

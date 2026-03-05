@@ -5,7 +5,7 @@ from pathlib import Path
 
 import cv2
 from fastapi import APIRouter, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 
 from lrslibrary.config import UPLOAD_DIR
 from lrslibrary.models import VideoMetadata
@@ -81,14 +81,18 @@ def get_video_frame(video_id: str, frame_num: int):
     if not ret:
         raise HTTPException(status_code=500, detail="Failed to read frame")
 
-    # Convert to grayscale and save as temp PNG
+    # Convert to grayscale and encode as PNG in memory (no temp files)
     if len(frame.shape) == 3:
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    tmp_path = UPLOAD_DIR / f"_tmp_frame_{video_id}_{frame_num}.png"
-    cv2.imwrite(str(tmp_path), frame)
+    success, png_bytes = cv2.imencode(".png", frame)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to encode frame")
 
-    return FileResponse(str(tmp_path), media_type="image/png")
+    return StreamingResponse(
+        iter([png_bytes.tobytes()]),
+        media_type="image/png",
+    )
 
 
 def get_video_store() -> dict[str, dict]:

@@ -47,3 +47,4 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
+ignore = ["E741"]  # Allow 'O' as variable name (standard L, S, O decomposition notation)
