@@ -42,6 +42,7 @@ class RLRT(Decomposer):
         A = np.zeros((m, n), dtype=np.float64)
         E = np.zeros((m, n), dtype=np.float64)
         mu = 1.25 / np.linalg.norm(M_2d, 2)
+        mu_bar = mu * 1e7
         rho = 1.5
         d_norm = np.linalg.norm(M_2d, "fro")
 
@@ -58,7 +59,7 @@ class RLRT(Decomposer):
 
             Z = M_2d - A - E
             Y += mu * Z
-            mu = min(mu * rho, mu * 1e7)
+            mu = min(mu * rho, mu_bar)
 
             if np.linalg.norm(Z, "fro") / (d_norm + 1e-16) < tol:
                 break

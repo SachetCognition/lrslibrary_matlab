@@ -34,7 +34,6 @@ class LNMF(Decomposer):
         H = np.abs(rng.randn(rank, n)) + 0.1
 
         for _k in range(max_iter):
-            W @ H
             # Update W with locality constraint
             num_W = M_pos @ H.T
             den_W = np.ones((m, 1)) @ np.sum(H, axis=1, keepdims=True).T + 1e-10

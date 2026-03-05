@@ -45,7 +45,6 @@ class ALM(Decomposer):
         sv = min(10, min(n, p))
 
         for _iter_out in range(max_iter_out):
-            A.copy()
             Ek = E.copy()
 
             # Inner loop
@@ -81,13 +80,9 @@ class ALM(Decomposer):
                     B_mat = B_mat / (1.0 + mu * beta_param) * max(0, 1.0 - beta_param * eta / ns)
                 Akk = Akk + alpha * (B_mat - Ahk)
 
-            # E update
+            # E update - element-wise soft thresholding for L1 penalty
             G = D - Ahk + Y / mu
-            ns = np.linalg.norm(G)
-            if ns > 0:
-                Ep = G * max(0, 1.0 - lam / mu / ns)
-            else:
-                Ep = np.zeros_like(D)
+            Ep = np.sign(G) * np.maximum(np.abs(G) - lam / mu, 0)
 
             A = Ahk
             E = Ep

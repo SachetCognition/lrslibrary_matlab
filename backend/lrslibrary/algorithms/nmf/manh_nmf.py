@@ -35,7 +35,6 @@ class ManhNMF(Decomposer):
 
         for _k in range(max_iter):
             WH = W @ H + 1e-10
-            M_pos / WH
 
             # L1 weights
             weights = 1.0 / (np.abs(M_pos - WH) + 1e-10)

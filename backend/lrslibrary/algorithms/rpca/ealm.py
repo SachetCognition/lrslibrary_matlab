@@ -53,7 +53,9 @@ class EALM(Decomposer):
 
             # Primal problem by alternating projection
             primal_converged = False
-            while not primal_converged:
+            primal_iter = 0
+            while not primal_converged and primal_iter < 100:
+                primal_iter += 1
                 temp_T = D - A_hat + (1.0 / mu) * Y
                 temp_E = np.maximum(temp_T - lam / mu, 0) + np.minimum(
                     temp_T + lam / mu, 0
