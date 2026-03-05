@@ -66,7 +66,7 @@ export default function ResultViewer({ jobId }: ResultViewerProps) {
         value={frameNum}
         onChange={setFrameNum}
         min={0}
-        max={99}
+        max={(jobStatus.nframes ?? 1) - 1}
         step={1}
         label={(value) => `Frame ${value}`}
       />

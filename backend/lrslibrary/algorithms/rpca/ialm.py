@@ -40,7 +40,7 @@ class IALM(Decomposer):
         m, n = D.shape
 
         # Default parameters (matching inexact_alm_rpca.m lines 33-35)
-        lam = 1.0 / np.sqrt(max(m, n))
+        lam = 1.0 / np.sqrt(m)
         tol = 1e-7
         max_iter = 1000
 

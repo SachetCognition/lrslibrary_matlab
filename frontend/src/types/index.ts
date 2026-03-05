@@ -20,6 +20,7 @@ export interface JobStatus {
   cputime?: number;
   result_urls?: Record<string, string>;
   error?: string;
+  nframes?: number;
 }
 
 export interface VideoMetadata {

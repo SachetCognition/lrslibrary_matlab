@@ -33,6 +33,7 @@ class JobStatus(BaseModel):
     cputime: float | None = None
     result_urls: dict | None = None
     error: str | None = None
+    nframes: int | None = None
 
 
 class VideoMetadata(BaseModel):

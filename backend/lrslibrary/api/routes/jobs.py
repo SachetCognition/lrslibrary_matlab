@@ -100,6 +100,7 @@ def create_job(request: JobRequest):
         cputime=store["cputime"],
         result_urls=store["result_urls"],
         error=store.get("error"),
+        nframes=store.get("nframes"),
     )
 
 
@@ -117,6 +118,7 @@ def get_job_status(job_id: str):
         cputime=store["cputime"],
         result_urls=store["result_urls"],
         error=store.get("error"),
+        nframes=store.get("nframes"),
     )
 
 
