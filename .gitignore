@@ -11,3 +11,8 @@ demo_bmc_eval.m
 demo_bmc_eval2.m
 dataset/BMC2012
 lrs_conf.mat
+__pycache__/
+*.egg-info/
+node_modules/
+dist/
+.pytest_cache/

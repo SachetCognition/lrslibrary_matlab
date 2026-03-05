@@ -13,6 +13,86 @@ The *LRSLibrary* provides a collection of **low-rank and sparse decomposition** 
 <p align="center"><img src="https://raw.githubusercontent.com/andrewssobral/lrslibrary/master/figs/lrs_results2.png" /></p>
 <p align="center"><img src="https://raw.githubusercontent.com/andrewssobral/lrslibrary/master/figs/lrs-opt.gif" /></p>
 
+---
+
+## Python + React Migration
+
+This repository is being migrated from MATLAB to **Python (FastAPI backend) + React (TypeScript frontend)**. The migration preserves all algorithm implementations while providing a modern web-based interface.
+
+### Architecture
+
+```
+lrslibrary_matlab/
+├── backend/                  # Python FastAPI backend
+│   ├── lrslibrary/
+│   │   ├── algorithms/       # Decomposition algorithms (8 categories)
+│   │   │   ├── base.py       # Decomposer ABC, DecompositionResult
+│   │   │   └── rpca/         # RPCA algorithms (FPCP, IALM, ...)
+│   │   ├── registry.py       # Algorithm registry & dispatch
+│   │   ├── video/            # Video I/O (loader, converter, exporter)
+│   │   ├── api/              # FastAPI routes
+│   │   └── models.py         # Pydantic models
+│   └── tests/                # pytest test suite
+├── frontend/                 # React TypeScript frontend
+│   ├── src/
+│   │   ├── components/       # UI components
+│   │   ├── pages/            # Route pages
+│   │   ├── hooks/            # React Query hooks
+│   │   └── api/              # API client
+│   └── __tests__/            # Vitest test suite
+├── docker-compose.yml        # Docker orchestration
+└── Makefile                  # Build & dev commands
+```
+
+### Quick Start
+
+```bash
+# Backend
+cd backend && pip install -e ".[dev]"
+
+# Frontend
+cd frontend && npm install
+
+# Run tests
+make backend-test
+make frontend-test
+
+# Dev servers
+make dev-backend   # port 8000
+make dev-frontend  # port 3000
+```
+
+### Adding New Algorithms
+
+```python
+from lrslibrary.algorithms.base import Decomposer, DecompositionParams, DecompositionResult, hard_threshold
+from lrslibrary.registry import register
+
+@register("RPCA", "MY_ALGO", "My Algorithm (Author, Year)", speed_class=1)
+class MyAlgo(Decomposer):
+    def decompose(self, data, params=None):
+        L = ...  # low-rank component
+        S = ...  # sparse component
+        O = hard_threshold(S)
+        return DecompositionResult(L=L, S=S, O=O)
+```
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/algorithms` | List all registered algorithms |
+| GET | `/api/algorithms/{method_id}` | List algorithms by category |
+| POST | `/api/video/upload` | Upload a video file |
+| POST | `/api/jobs` | Submit a decomposition job |
+| GET | `/api/jobs/{id}` | Get job status |
+
+### Migration Status
+
+**Phase 1 (Current):** Project scaffolding, core architecture, FPCP + IALM ported (2/106 algorithms)
+
+---
+
 See also:
 ```
 Presentation about Matrix and Tensor Tools for Computer Vision

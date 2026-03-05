@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lrslibrary"
+version = "0.1.0"
+description = "Low-Rank and Sparse Decomposition Library - Python port of LRSLibrary"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "scikit-learn>=1.2",
+    "tensorly>=0.8",
+    "cvxpy>=1.3",
+    "pymanopt>=2.0",
+    "opencv-python>=4.7",
+    "fastapi>=0.100",
+    "uvicorn>=0.23",
+    "celery>=5.3",
+    "redis>=5.0",
+    "pydantic>=2.0",
+    "python-multipart>=0.0.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "httpx>=0.24",
+    "pytest-asyncio>=0.21",
+    "ruff>=0.1.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["lrslibrary*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E741"]  # Allow 'O' as variable name (standard L, S, O decomposition notation)
